@@ -9,9 +9,11 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -43,8 +45,15 @@ public class SplashActivity extends ActionBarActivity {
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            if(isNeedUpdate(version)){
-                showUpdateDialog();
+//            if(isNeedUpdate(version)){
+//                showUpdateDialog();
+//            }
+            super.handleMessage(msg);
+            Log.i("SplashActivity", msg.what + "");
+            switch (msg.what) {
+                case 1:
+                    showUpdateDialog();
+                    break;
             }
         }
     };
@@ -61,15 +70,13 @@ public class SplashActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_splash);
 
-        tv_version = (TextView) findViewById(R.id.tv_splash_version);
-        version = getVersion();
-        tv_version.setText("版本号 "  + version);
+        initUI();
 
-        ll = (LinearLayout) findViewById(R.id.ll_splash_main);
+        //启动线程
+        Runnable r = new UpdateHandler();
+        Thread thread = new Thread(r);
+        thread.start();
 
-        AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f,1.0f);
-        alphaAnimation.setDuration(2000);
-        ll.startAnimation(alphaAnimation);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -87,6 +94,21 @@ public class SplashActivity extends ActionBarActivity {
         }.start();
     }
 
+    /**
+     * 初始化UI
+     */
+    private void initUI() {
+        tv_version = (TextView) findViewById(R.id.tv_splash_version);
+        version = getVersion();
+        tv_version.setText("版本号 "  + version);
+
+        ll = (LinearLayout) findViewById(R.id.ll_splash_main);
+
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f,1.0f);
+        alphaAnimation.setDuration(2000);
+        ll.startAnimation(alphaAnimation);
+    }
+
     private void showUpdateDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setIcon(android.R.drawable.ic_dialog_info);
@@ -94,20 +116,22 @@ public class SplashActivity extends ActionBarActivity {
         builder.setMessage(info.getDescription());
         builder.setCancelable(false);
 
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener(){
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    File dir = new File(Environment.getExternalStorageDirectory(),"/security/update");
+                    File dir = new File(Environment.getExternalStorageDirectory(), "/security/update");
                     if (!dir.exists()) {
-                        dir.mkdirs();
+                        Boolean suc = dir.mkdirs();
+                        Log.i("Security",suc.toString());
+
                     }
                     String apkPath = Environment.getExternalStorageDirectory() + "/security/update/new.apk";
                     UpdateTask task = new UpdateTask(info.getUrl(), apkPath);
                     progressDialog.show();
                     new Thread(task).start();
-                }else {
+                } else {
                     Toast.makeText(SplashActivity.this, "SD卡不可用，请插入SD卡", Toast.LENGTH_SHORT).show();
                     loadMainUI();
                 }
@@ -138,9 +162,11 @@ public class SplashActivity extends ActionBarActivity {
             String v = info.getVersion();
             if (v.equals(version)) {
                 System.out.println("不用更新");
+                Toast.makeText(this, "不用更新", Toast.LENGTH_SHORT).show();
                 return false;
             }else {
                 System.out.println("要更新");
+                Toast.makeText(this, "要更新", Toast.LENGTH_SHORT).show();
                 return true;
             }
         } catch (Exception e) {
@@ -170,23 +196,25 @@ public class SplashActivity extends ActionBarActivity {
     }
 
 
+    /**
+     * 安装apk
+     * @param file 要安装的apk的目录
+     */
+    private void install(File file)
+    {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+        finish();
+        startActivity(intent);
+    }
+
+    /**
+     * 下载的线程
+     */
     class UpdateTask implements Runnable{
         private String path;
         private String filePath;
-
-        /**
-         * 安装apk
-         * @param file 要安装的apk的目录
-         */
-        private void install(File file)
-        {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
-            finish();
-            startActivity(intent);
-        }
-
 
         public UpdateTask(String path, String filePath) {
             this.path = path;
@@ -209,6 +237,26 @@ public class SplashActivity extends ActionBarActivity {
         }
     }
 
+
+    /**
+     * 查询更新的线程
+     * 0.4以后不能在主线程处理网络相关
+     * @author quan
+     *
+     */
+    private class UpdateHandler implements Runnable {
+        Message msg = new Message();
+        @Override
+        public void run() {
+            Looper.prepare();
+            if(isNeedUpdate(getVersion())) {
+                msg.what = 1;
+            }
+            handler.sendMessage(msg);
+            Looper.loop();
+        }
+
+    }
 
 
     @Override
