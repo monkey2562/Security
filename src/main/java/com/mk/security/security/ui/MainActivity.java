@@ -7,9 +7,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -17,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.w3c.dom.Text;
+
+import java.io.InputStream;
 
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener
 {
@@ -29,6 +34,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+//        //设置不要显示标题栏
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
 
         sp = this.getSharedPreferences("config", Context.MODE_PRIVATE);
@@ -83,6 +90,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         switch (i) {
             case 0 : //手机防盗
+                Log.i("Security","手机防盗");
+                Intent intent = new Intent(this, LostProtectedActivity.class);
+                startActivity(intent);
                 break;
             case 1 : //通讯卫士
                 break;

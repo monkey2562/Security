@@ -51,9 +51,14 @@ public class SplashActivity extends ActionBarActivity {
             super.handleMessage(msg);
             Log.i("SplashActivity", msg.what + "");
             switch (msg.what) {
+                case 0:
+                    loadMainUI();
+                    break;
                 case 1:
                     showUpdateDialog();
                     break;
+//                default:
+//                    loadMainUI();
             }
         }
     };
@@ -192,7 +197,7 @@ public class SplashActivity extends ActionBarActivity {
     {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
-        finish();
+//        finish();
     }
 
 

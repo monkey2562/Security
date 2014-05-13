@@ -55,7 +55,7 @@ public class MainUIAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = inflater.inflate(R.layout.main_item,null);
+        /*View view = inflater.inflate(R.layout.main_item,null);
         imageView = (ImageView) view.findViewById(R.id.iv_main_icon);
         textView = (TextView) view.findViewById(R.id.tv_main_name);
         imageView.setImageResource(ICONS[position]);
@@ -67,6 +67,43 @@ public class MainUIAdapter extends BaseAdapter {
                 textView.setText(name);
             }
         }
+        return view;*/
+
+        //convertView 相当于缓存一样，只要我们判断一下它是不是为null，就可以知道现在这个view有没有绘制过出来
+        //如果没有，那么就重新绘制，如果有，那么就可以使用缓存啦，这样就可以大大的节省view绘制的时间了，进行了优化，使ListView更加流畅
+        MainViews views;
+        View view;
+        if(convertView == null){
+            views = new MainViews();
+            view = inflater.inflate(R.layout.main_item,null);
+            views.imageView = (ImageView) view.findViewById(R.id.iv_main_icon);
+            views.textView = (TextView) view.findViewById(R.id.tv_main_name);
+            views.imageView.setImageResource(ICONS[position]);
+            views.textView.setText(NAMES[position]);
+            view.setTag(views);
+        } else {
+            view = convertView;
+            views = (MainViews) view.getTag();
+            views.imageView = (ImageView) view.findViewById(R.id.iv_main_icon);
+            views.textView = (TextView) view.findViewById(R.id.tv_main_name);
+            views.imageView.setImageResource(ICONS[position]);
+            views.textView.setText(NAMES[position]);
+        }
+        if (position == 0) {
+            String name = sp.getString("lostName", "");
+            if (!name.equals("")) {
+                textView.setText(name);
+            }
+        }
         return view;
+    }
+
+    //==================================================================================
+
+    //一个存放所有要绘制的控件的类
+    private class MainViews
+    {
+        ImageView imageView;
+        TextView textView;
     }
 }
