@@ -25,5 +25,5 @@
         android:listSelector="@drawable/item_background_selector"
         android:verticalSpacing="8dip"
         android:layout_marginTop="10dip"
-        android:numColumns="3" />
+        android:numColumns="2" />
 </LinearLayout>

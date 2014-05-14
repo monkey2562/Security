@@ -2,6 +2,7 @@ package com.mk.security.security.ui;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -68,6 +69,11 @@ public class LostProtectedActivity extends ActionBarActivity implements View.OnC
         return true;
     }
 
+    private boolean isSetupGuide()
+    {
+        return sp.getBoolean("setupGuide", false);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -101,6 +107,14 @@ public class LostProtectedActivity extends ActionBarActivity implements View.OnC
                         SharedPreferences.Editor editor = sp.edit();
                         editor.putString("password", MD5Encoder.encode(fp));
                         editor.commit();
+
+                        if (!isSetupGuide()) {
+                            finish();
+                            Intent intent = new Intent(this, SetupGuide1Activity.class);
+                            startActivity(intent);
+                        }
+
+
                     }else {
                         Toast.makeText(this, "两次密码不相同", Toast.LENGTH_SHORT).show();
                         return;
@@ -121,6 +135,12 @@ public class LostProtectedActivity extends ActionBarActivity implements View.OnC
                 } else {
                     String str = sp.getString("password", "");
                     if (MD5Encoder.encode(pwd).equals(str)) {
+                        if(!isSetupGuide())
+                        {
+                            finish();
+                            Intent intent = new Intent(this, SetupGuide1Activity.class);
+                            startActivity(intent);
+                        }
                         dialog.dismiss();
                     } else {
                         Toast.makeText(this, "密码错误", Toast.LENGTH_SHORT).show();
