@@ -45,6 +45,7 @@ public class SetupGuide2Activity extends ActionBarActivity implements View.OnCli
         } else {
             cb_bind.setText("没有绑定");
             cb_bind.setChecked(false);
+            resetSimInfo();
         }
         cb_bind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -55,6 +56,7 @@ public class SetupGuide2Activity extends ActionBarActivity implements View.OnCli
                     setSimInfo();
                 } else {
                     cb_bind.setText("没有绑定");
+                    resetSimInfo();
                 }
             }
         });
@@ -65,6 +67,13 @@ public class SetupGuide2Activity extends ActionBarActivity implements View.OnCli
         String simSerial = telephonyManager.getSimSerialNumber();//拿到sim卡的序列号，是唯一的
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("simSerial", simSerial);
+        editor.commit();
+    }
+
+    private void resetSimInfo()        //解除绑定
+    {
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString("simSerial", null);
         editor.commit();
     }
 
@@ -113,5 +122,6 @@ public class SetupGuide2Activity extends ActionBarActivity implements View.OnCli
             default :
                 break;
         }
+
     }
 }

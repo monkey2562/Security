@@ -36,6 +36,9 @@
     <string name="next">下一步</string>
     <string name="pervious">上一步</string>
     <string name="finish">完成</string>
+    <string name="lostProtectedNumber">安全号码</string>
+    <string name="isProtected">已经开启保护</string>
+    <string name="rePlayGuide">重新进入设置向导</string>
     <string name="title_activity_setup_guide1">SetupGuide1Activity</string>
     <string name="title_activity_setup_guide2">SetupGuide2Activity</string>
     <string name="title_activity_setup_guide3">SetupGuide3Activity</string>
